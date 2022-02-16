@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "cs4435/calculator/proto"; // Don't forget to change!
+
+package calculator;
+
+// The greeting service definition.
+service Greeter {
+    // Sends a greeting
+    rpc Calculate (CalcRequest) returns (CalcReply) {}
+}
+
+// The request message containing the user's name.
+message CalcRequest {
+    string name = 1;
+}
+
+// The response message containing the greetings
+message CalcReply {
+    string message = 1;
+}
