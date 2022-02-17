@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "bank/proto"; // Don't forget to change!
+
+package bank;
+
+// The bankupdate service definition.
+service Bank {
+    // Sends a BankUpdate
+    rpc BankUpdate (BankUpdateRequest) returns (BankUpdateReply) {}
+}
+
+// The request message containing the action
+message BankUpdateRequest {
+    string name = 1;
+}
+
+// The response message containing the action
+message BankUpdateReply {
+    string message = 1;
+}

@@ -4,18 +4,18 @@ option go_package = "cs4435/calculator/proto"; // Don't forget to change!
 
 package calculator;
 
-// The greeting service definition.
-service Greeter {
-    // Sends a greeting
+// The Calculate service definition.
+service Calculator {
+    // Sends a Calculate
     rpc Calculate (CalcRequest) returns (CalcReply) {}
 }
 
-// The request message containing the user's name.
+// The request message containing the action.
 message CalcRequest {
     string name = 1;
 }
 
-// The response message containing the greetings
+// The response message containing the action
 message CalcReply {
     string message = 1;
 }
