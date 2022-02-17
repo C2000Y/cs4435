@@ -1,2 +1,8 @@
 add 5 1
 div 1 2
+mult 5 22
+sub 0 5
+add 2 9
+sub 1999 99
+mult 9 0
+div 9 1

@@ -3,11 +3,8 @@ package main
 import (
     "context"
     "log"
-    // "os"
     "time"
     "io/ioutil"
-    "fmt"
-    // "strings"
 
     "google.golang.org/grpc"
 
@@ -17,6 +14,11 @@ import (
 const (
     address     = "localhost"
     defaultName = "world"
+    port = "../../bin/port.txt"
+    input = "../../bin/input.txt"
+     // use for go build file
+    // input string = "input.txt"
+    // port string = "port.txt"
 )
 
 func readPortFile(fileName string) string {
@@ -42,9 +44,9 @@ func readInputFile(fileName string) string {
 
 func main() {
     //getPort
-    port := readPortFile("../../bin/port.txt")
-    input := readInputFile("../../bin/input.txt")
-    fmt.Println(input)
+    port := readPortFile(port)
+    input := readInputFile(input)
+    // fmt.Println(input)
     // Set up a connection to the server.
     conn, err := grpc.Dial(address+port, grpc.WithInsecure(), grpc.WithBlock())
     if err != nil {
@@ -54,18 +56,13 @@ func main() {
     c := pb.NewGreeterClient(conn)
 
     // Contact the server and print out its response.
-    // name := defaultName
-    // if len(os.Args) > 1 {
-    //     name = os.Args[1]
-    // }
-    // fmt.Println(os.Args[1])
     ctx, cancel := context.WithTimeout(context.Background(), time.Second)
     defer cancel()
     r, err := c.Calculate(ctx, &pb.CalcRequest{Name: input})
     if err != nil {
-        log.Fatalf("could not greet: %v", err)
+        log.Fatalf("error message: %v", err)
     }
-    log.Printf("Greeting: %s", r.GetMessage())
+    log.Printf("message: %s", r.GetMessage())
 }
 
 
