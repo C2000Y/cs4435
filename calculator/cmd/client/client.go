@@ -5,6 +5,10 @@ import (
     "log"
     "time"
     "io/ioutil"
+    "fmt"
+    "os"
+    "bufio"
+    "strings"
 
     "google.golang.org/grpc"
 
@@ -16,9 +20,11 @@ const (
     defaultName = "world"
     port = "../../bin/port.txt"
     input = "../../bin/input.txt"
+    path string = "../../bin/output.txt"
      // use for go build file
     // input string = "input.txt"
     // port string = "port.txt"
+    // path string = "output.txt"
 )
 
 func readPortFile(fileName string) string {
@@ -42,6 +48,20 @@ func readInputFile(fileName string) string {
 	return str
 }
 
+func writeFile(action string) error{
+    file, err := os.Create(path)
+    if err != nil {
+		log.Fatal("file path error")
+	}
+	defer file.Close()
+    w := bufio.NewWriter(file)
+    operations := strings.Split(action, "/n")
+    for _, v := range operations {
+        fmt.Fprintln(w, v)
+    }
+	return w.Flush()
+}
+
 func main() {
     //getPort
     port := readPortFile(port)
@@ -62,7 +82,11 @@ func main() {
     if err != nil {
         log.Fatalf("error message: %v", err)
     }
-    log.Printf("message: %s", r.GetMessage())
+    wirteErr := writeFile(r.GetMessage())
+    if wirteErr != nil {
+        log.Fatalf("error message: %v", wirteErr)
+    }
+    log.Printf("File successfully output")
 }
 
 

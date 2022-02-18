@@ -8,8 +8,8 @@ import (
     "fmt"
     "strings"
     "strconv"
-    "os"
-    "bufio"
+    // "os"
+    // "bufio"
     "errors"
 
     "google.golang.org/grpc"
@@ -18,10 +18,8 @@ import (
 )
 
 const (
-    path string = "../../bin/output.txt"
     port string = "../../bin/port.txt"
     // use for go build file
-    // path string = "output.txt"
     // port string = "port.txt"
 )
 
@@ -34,27 +32,22 @@ type server struct {
 func (s *server) Calculate(ctx context.Context, input *pb.CalcRequest) (*pb.CalcReply, error) {
     log.Printf("Received message! processing...")
     action := strings.Split(input.GetName(), "\n")
-    err := writeFile(action)
+    response, err := writeFile(action)
     log.Printf("Done!")
-    return &pb.CalcReply{Message: "done outputing file"}, err
+    return &pb.CalcReply{Message: response}, err
 }
 
-func writeFile(action []string) error{
-    file, err := os.Create(path)
-    if err != nil {
-		return errors.New("output path error")
-	}
-	defer file.Close()
-    w := bufio.NewWriter(file)
+func writeFile(action []string) (string,error){
+    var response string
     for _, v := range action {
         action := strings.Fields(v)
         result,err := getResult(action)
-        if err!=nil{
-            return err
+        response += result +"/n"
+        if err != nil {
+            return "",err
         }
-        fmt.Fprintln(w, result)
     }
-	return w.Flush()
+	return response, nil
 }
 
 // calculation

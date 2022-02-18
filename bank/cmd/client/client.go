@@ -42,6 +42,7 @@ func readInputFile(fileName string) string {
 	return str
 }
 
+
 func main() {
     //getPort
     port := readPortFile(port)
