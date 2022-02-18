@@ -10,6 +10,7 @@ import (
     "strconv"
     "errors"
     "encoding/json"
+    "math"
 
     "google.golang.org/grpc"
 
@@ -80,11 +81,11 @@ func changeBalance(data []JsonData, action []string) ([]JsonData,error) {
                 if strings.Compare(act[1],strconv.Itoa(acc.AccountID)) == 0 {
                     switch act[0] {
                     case "deposit":
-                        data[index].Balance = json.Number(fmt.Sprintf("%0.2f", balance + amount))
+                        data[index].Balance = json.Number(fmt.Sprintf("%0.2f", math.Round((balance + amount)*100)/100))
                     case "withdraw":
-                        data[index].Balance = json.Number(fmt.Sprintf("%0.2f", balance - amount))
+                        data[index].Balance = json.Number(fmt.Sprintf("%0.2f", math.Round((balance - amount)*100)/100))
                     case "interest":
-                        data[index].Balance = json.Number(fmt.Sprintf("%0.2f", balance + (balance * amount / 100)))
+                        data[index].Balance = json.Number(fmt.Sprintf("%0.2f", math.Round((balance + (balance * amount / 100))*100)/100))
                     }
                     // flag used actions
                     s[j] = true
