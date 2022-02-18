@@ -1,1 +1,8 @@
-deposit 1 10.00
+deposit 100 10
+withdraw  2 100
+interest 3 5
+deposit 2 20
+withdraw 1 33
+interest 2 10
+withdraw  3 23
+interest 100 3

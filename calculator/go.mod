@@ -1,4 +1,4 @@
-module cs4435/calculator
+module calculator
 
 go 1.13
 

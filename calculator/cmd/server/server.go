@@ -14,7 +14,7 @@ import (
 
     "google.golang.org/grpc"
 
-    pb "cs4435/calculator/proto"
+    pb "calculator/proto"
 )
 
 const (
@@ -27,7 +27,7 @@ const (
 
 // server is used to implement helloworld.GreeterServer.
 type server struct {
-    pb.UnimplementedGreeterServer
+    pb.UnimplementedCalculatorServer
 }
 
 // SayHello implements helloworld.GreeterServer
@@ -105,7 +105,7 @@ func main() {
     }
     log.Println("listen to port ",port)
     s := grpc.NewServer()
-    pb.RegisterGreeterServer(s, &server{})
+    pb.RegisterCalculatorServer(s, &server{})
     if err := s.Serve(lis); err != nil {
         log.Fatalf("failed to serve: %v", err)
     }
