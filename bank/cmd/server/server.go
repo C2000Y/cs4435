@@ -19,11 +19,11 @@ import (
 
 const (
     path string = "../../bin/accountsUpdated.json"
-    port string = "../../bin/port.txt"
+    port string = "../../bin/port"
     inputJson string = "../../bin/accounts.json"
     // use for go build file
-    // path string = "accountsUpdated.txt"
-    // port string = "port.txt"
+    // path string = "accountsUpdated.json"
+    // port string = "port"
     // inputJson string = "accounts.json"
 )
 

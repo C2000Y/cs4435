@@ -18,9 +18,9 @@ import (
 )
 
 const (
-    port string = "../../bin/port.txt"
+    port string = "../../bin/port"
     // use for go build file
-    // port string = "port.txt"
+    // port string = "port"
 )
 
 // server is used to implement helloworld.GreeterServer.

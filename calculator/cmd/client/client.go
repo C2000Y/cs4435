@@ -18,13 +18,13 @@ import (
 const (
     address     = "localhost"
     defaultName = "world"
-    port = "../../bin/port.txt"
-    input = "../../bin/input.txt"
-    path string = "../../bin/output.txt"
+    port = "../../bin/port"
+    input = "../../bin/input"
+    path string = "../../bin/output"
      // use for go build file
-    // input string = "input.txt"
-    // port string = "port.txt"
-    // path string = "output.txt"
+    // input string = "input"
+    // port string = "port"
+    // path string = "output"
 )
 
 func readPortFile(fileName string) string {
