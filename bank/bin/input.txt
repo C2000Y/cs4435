@@ -1,4 +1,4 @@
-deposit 100 10
+deposit 100 10.50
 withdraw  2 100
 interest 3 5
 deposit 2 20

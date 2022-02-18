@@ -17,13 +17,13 @@ import (
 )
 
 const (
-    // path string = "../../bin/accountsUpdated.json"
-    // port string = "../../bin/port.txt"
-    // inputJson string = "../../bin/accounts.json"
+    path string = "../../bin/accountsUpdated.json"
+    port string = "../../bin/port.txt"
+    inputJson string = "../../bin/accounts.json"
     // use for go build file
-    path string = "accountsUpdated.json"
-    port string = "port.txt"
-    inputJson string = "accounts.json"
+    // path string = "accountsUpdated.txt"
+    // port string = "port.txt"
+    // inputJson string = "accounts.json"
 )
 
 type JsonData struct {
