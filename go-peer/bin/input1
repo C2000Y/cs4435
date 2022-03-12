@@ -1,0 +1,4 @@
+deposit 4 15.00
+interest 3 5
+withdraw  2 123.45
+done

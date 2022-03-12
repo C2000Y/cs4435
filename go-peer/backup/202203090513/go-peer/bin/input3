@@ -1,0 +1,4 @@
+deposit 3 10.50
+withdraw  4 10
+interest 1 10
+done
