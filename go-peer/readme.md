@@ -1,4 +1,4 @@
-to run the program, follow command format:   
+to run the program, stay in the directory **go-peer**, and use follow command format:   
 **go run file [name] [listening address] [consul address] [operation file]**  
 for example:  
 go run node/main.go "Gnode 1" :2333 localhost:8500 input1  
