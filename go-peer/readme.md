@@ -1,5 +1,5 @@
 to run the program, follow command format:   
-**go run file <name> <listening address> <consul address> <operation file>**  
+**go run file [name] [listening address] [consul address] [operation file]**  
 for example:  
 go run node/main.go "Gnode 1" :2333 localhost:8500 input1  
 go run node/main.go "Gnode 2" :2334 localhost:8500 input2  
