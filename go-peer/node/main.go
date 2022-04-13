@@ -49,6 +49,7 @@ var (
 	AccountDetails []JsonData
 	Operations     []string
 	OperationIndex int = 0
+	NodeName       string
 )
 
 const (
@@ -273,7 +274,7 @@ func (n *node) SetupClient(node string, addr string, timestamp int64, operation 
 		log.Fatalf("could not greet: %v", err)
 	}
 	log.Printf("Greeting from the other node: %s, timeStamp: %s", node, r.Message)
-	// TODO:  记录收到的node的timestamp
+	// 记录收到的node的timestamp
 	stampstamp, err := strconv.Atoi(r.Message)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
@@ -290,7 +291,7 @@ func (n *node) SetupClient(node string, addr string, timestamp int64, operation 
 
 // Busy Work module, greet every new member you find
 func (n *node) GreetAll() {
-	kvpairs, _, err := n.SDKV.List("Gnode", nil)
+	kvpairs, _, err := n.SDKV.List(NodeName, nil)
 	if err != nil {
 		log.Panicln(err)
 		return
@@ -335,7 +336,7 @@ func (n *node) GreetAll() {
 }
 
 func (n *node) DoOperation(timetmp int64) {
-	kvpairs, _, err := n.SDKV.List("Gnode", nil)
+	kvpairs, _, err := n.SDKV.List(NodeName, nil)
 	if err != nil {
 		log.Panicln(err)
 		return
@@ -395,12 +396,24 @@ func main() {
 	sdaddress := args[2]
 	operation := args[3]
 
-	nodeNumber, err := strconv.Atoi(strings.Split(name, " ")[1])
-	if err != nil {
-		log.Fatal("input argument <name> should have string with an integer, for example: Gnode 1")
+	nameSplit := strings.Split(name, " ")
+	var (
+		nodeNumber int
+		err        error
+	)
+	if len(nameSplit) < 2 {
+		nodeNumber, err = strconv.Atoi(nameSplit[0])
+		log.Fatal("input argument <name> should have string with an integer, for example: Gnode 1, or node 2, or xxx 3")
+	} else {
+		nodeNumber, err = strconv.Atoi(nameSplit[1])
+		NodeName = nameSplit[0]
+		if err != nil {
+			log.Fatal("input argument <name> should have string with an integer, for example: Gnode 1, or node 2, or xxx 3")
+		}
 	}
 	noden := node{Name: name, Addr: listenaddr, SDAddress: sdaddress, OperationsFile: operation, Clients: nil, TimeStamp: 0, NodeNumber: nodeNumber, NodeMap: nil} // noden is for opeartional purposes
 
 	// start the node
 	noden.Start()
 }
+
