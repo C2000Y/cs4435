@@ -3,7 +3,6 @@ module ChatRoom4435
 go 1.17
 
 require (
-	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/hashicorp/consul/api v1.12.0
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5
