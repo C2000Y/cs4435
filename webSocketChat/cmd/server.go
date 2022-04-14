@@ -17,7 +17,6 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc"
 	"golang.org/x/net/context"
-	"github.com/google/uuid"
 	chat "ChatRoom4435/proto"
 )
 
@@ -55,6 +54,36 @@ var (
 	nd node
 )
 
+
+//客户端 Client
+type Client struct {
+	//用户id
+	id string
+	//连接的socket
+	socket *websocket.Conn
+	//发送的消息
+	send chan []byte
+}
+
+//会把Message格式化成json
+type Message struct {
+	//消息struct
+	Name    string `json:"name,omitempty"`    
+	Photo string `json:"photo,omitempty"` 
+	Content   string `json:"content,omitempty"`   
+	Event string `json:"event,omitempty"` 
+	Img64 string `json:"img_64,omitempty"` 
+
+}
+
+//创建客户端管理者
+var manager = ClientManager{
+	broadcast:  make(chan []byte),
+	register:   make(chan *Client),
+	unregister: make(chan *Client),
+	clients:    make(map[*Client]bool),
+}
+
 func (n *node) SendMessage(ctx context.Context, in *chat.Message) (*chat.MessageReply, error) {
 	log.Printf("Received: %v, %v, %v", in.Name, in.Event, in.Content)
 	n.NodeMap[in.Name] = in.Timestamp
@@ -70,11 +99,11 @@ func (n *node) SendMessage(ctx context.Context, in *chat.Message) (*chat.Message
 		cnt = "received"
 		e = "hello back"
 		break
-	case "msg":
+	case "message":
 		cnt = "received"
 		e = "msg process"
-		jsonMessage, _ := json.Marshal(&Message{Sender: in.Cid, Content: string(in.Content)})
-		fmt.Println("get: ",string(in.Content))
+		jsonMessage, _ := json.Marshal(&Message{Name: in.Cid, Content: in.Content, Photo: in.Photo, Event: in.Event, Img64: in.Img})
+		fmt.Println("get Sender: ",string(jsonMessage))
 		// TODO: process data
 		manager.broadcast <- jsonMessage
 		break
@@ -82,31 +111,6 @@ func (n *node) SendMessage(ctx context.Context, in *chat.Message) (*chat.Message
 	return &chat.MessageReply{Name: n.Name, Content: cnt, Event: e, Timestamp: n.TimeStamp}, nil
 }
 
-//客户端 Client
-type Client struct {
-	//用户id
-	id string
-	//连接的socket
-	socket *websocket.Conn
-	//发送的消息
-	send chan []byte
-}
-
-//会把Message格式化成json
-type Message struct {
-	//消息struct
-	Sender    string `json:"sender,omitempty"`    //发送者
-	Recipient string `json:"recipient,omitempty"` //接收者
-	Content   string `json:"content,omitempty"`   //内容
-}
-
-//创建客户端管理者
-var manager = ClientManager{
-	broadcast:  make(chan []byte),
-	register:   make(chan *Client),
-	unregister: make(chan *Client),
-	clients:    make(map[*Client]bool),
-}
 
 func (manager *ClientManager) start() {
 	for {
@@ -170,13 +174,19 @@ func (c *Client) read() {
 			break
 		}
 		//如果没有错误信息就把信息放入broadcast
-		nd.GreetAll(c.id, string(message))
-		jsonMessage, _ := json.Marshal(&Message{Sender: c.id, Content: string(message)})
-		fmt.Println("get: ",message)
+		data := make(map[string]string)
+		err = json.Unmarshal(message, &data)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("get Data: ", data)
+		nd.GreetAll(c.id, data)
+		jsonMessage, _ := json.Marshal(&Message{Name: data["name"], Content: data["content"], Photo: data["photo"], Event: data["event"], Img64: data["img_64"]})
+		fmt.Println("get: ", string(jsonMessage))
 		// time.Sleep(1 * time.Second)
 		// // TODO: process data
 		manager.broadcast <- jsonMessage
-		fmt.Println("id:", c.id, ", ct",string(message))
+		fmt.Println("id:", data["name"], ", ct: ",data["content"])
 	}
 }
 
@@ -195,7 +205,7 @@ func (c *Client) write() {
 				return
 			}
 			//有消息就写入，发送给web端
-			fmt.Println("send: ",message)
+			fmt.Println("send: ", string(message))
 			c.socket.WriteMessage(websocket.TextMessage, message)
 		}
 	}
@@ -245,14 +255,14 @@ func (n *node) registerService() {
 func wsHandler(res http.ResponseWriter, req *http.Request) {
 	//将http协议升级成websocket协议
 	conn, err := (&websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}).Upgrade(res, req, nil)
+	// url, _ := json.Marshal(req.URL)
 	if err != nil {
 		http.NotFound(res, req)
 		return
 	}
-
-	//每一次连接都会新开一个client，client.id通过uuid生成保证每次都是不同的
-	
-	client := &Client{id: uuid.Must(uuid.NewRandom()).String(), socket: conn, send: make(chan []byte)}
+	fmt.Println(req.RequestURI)
+	guestId := strings.Split(req.RequestURI, "id=")
+	client := &Client{id: guestId[1], socket: conn, send: make(chan []byte)}
 	//注册一个新的链接
 	manager.register <- client
 
@@ -263,7 +273,7 @@ func wsHandler(res http.ResponseWriter, req *http.Request) {
 }
 
 // Setup a new grpc client for contacting the server at addr.
-func (n *node) SetupClient(node string, addr string, timestamp int64, content string, event string, cid string) {
+func (n *node) SetupClient(node string, addr string, timestamp int64, content string, event string, cid string, photo string, img string) {
 	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
@@ -271,7 +281,7 @@ func (n *node) SetupClient(node string, addr string, timestamp int64, content st
 
 	defer conn.Close()
 	n.Clients[node] = chat.NewChatClient(conn)
-	r, err := n.Clients[node].SendMessage(context.Background(), &chat.Message{Name: n.Name, Timestamp: timestamp, Content: content, Event: event})
+	r, err := n.Clients[node].SendMessage(context.Background(), &chat.Message{Name: n.Name, Timestamp: timestamp, Content: content, Event: event, Cid: cid, Photo: photo, Img: img})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
@@ -296,13 +306,14 @@ func (n *node) StartGreet() {
 	for _, kventry := range kvpairs {
 		if strings.Compare(kventry.Key, n.Name) != 0 {
 			fmt.Println("send to: ", kventry.Key)
-			n.SetupClient(kventry.Key, string(kventry.Value), timetmp, "", "hello", "")
+			n.SetupClient(kventry.Key, string(kventry.Value), timetmp, "", "hello", "","","")
 		}
 	}
 }
 
 // Busy Work module, greet every new member you find
-func (n *node) GreetAll(cid string, cnt string) {
+func (n *node) GreetAll(cid string, data map[string]string) {
+
 	kvpairs, _, err := n.SDKV.List(n.NodeName, nil)
 	if err != nil {
 		log.Panicln(err)
@@ -312,7 +323,7 @@ func (n *node) GreetAll(cid string, cnt string) {
 	for _, kventry := range kvpairs {
 		if strings.Compare(kventry.Key, n.Name) != 0 {
 			fmt.Println("send to: ", kventry.Key)
-			n.SetupClient(kventry.Key, string(kventry.Value), timetmp, cnt, "msg", cid)
+			n.SetupClient(kventry.Key, string(kventry.Value), timetmp, data["content"], data["event"], cid, data["photo"], data["img_64"])
 		}
 	}
 	fmt.Println(n.NodeMap)
@@ -354,12 +365,11 @@ func main() {
 	nd.registerService()
 
 	//开一个goroutine执行开始程序
-	time.Sleep(5 * time.Second)
+	time.Sleep(1 * time.Second)
 	nd.StartGreet()
 	go manager.start()
 	fmt.Println("Starting application...")
 	//注册默认路由为 /ws ，并使用wsHandler这个方法
 	http.HandleFunc("/ws", wsHandler)
-	//监听本地的8011端口
 	http.ListenAndServe(nd.Addr+"0", nil)
 }

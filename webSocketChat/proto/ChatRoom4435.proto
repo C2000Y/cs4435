@@ -16,6 +16,8 @@ message Message {
   string content =3;
   int64 timestamp = 4;
   string cid = 5;
+  string photo = 6;
+  string img = 7;
 }
 
 // The response message containing the greetings
@@ -25,4 +27,6 @@ message MessageReply {
   string content =3;
   int64 timestamp = 4;
   string cid = 5;
+  string photo = 6;
+  string img = 7;
 }
