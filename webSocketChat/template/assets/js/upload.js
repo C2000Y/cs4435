@@ -38,3 +38,4 @@ function getImgsByFileReader(el, files) {
     }
 }
 
+
